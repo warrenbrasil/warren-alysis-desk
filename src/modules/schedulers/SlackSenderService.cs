@@ -23,10 +23,17 @@ public class SlackSchedulerService : BackgroundService
         {
             using (var scope = _serviceScopeFactory.CreateScope())
             {
+                // DateTime utcNow = DateTime.UtcNow;
+                // TimeZoneInfo brasiliaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
+                // DateTime brasiliaTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, brasiliaTimeZone);
+                // if(brasiliaTime.ToString("HH") == "6")
+                // {
+
+                // }
+
                 await Task.Delay(60000 * 30, stoppingToken);
 
-                // var slackNotifier = new SlackNotifier(OAuthToken, ChannelId);
-                // await slackNotifier.SendMessageAsync("Olá, Slack! 🚀");
+                var slackNotifier = new SlackNotifier(OAuthToken, ChannelId);
 
                 var googleNewsExtractorService = scope.ServiceProvider
                     .GetRequiredService<IGoogleNewsExtractorService>();
@@ -34,18 +41,19 @@ public class SlackSchedulerService : BackgroundService
                 var googleNewsList = await googleNewsExtractorService
                     .GetGoogleNews();
                 
+                string newsList = "";
+                
                 foreach(var news in googleNewsList)
-                {
-                    var gptRes = await new ChatGptService(Token)
-                        .GetChatGptResponseAsync(
-                            $"Pode fazer um resumo do conteúdo do link a seguir: \n {news.Url} \n em até 3 parágrafos. " 
-                            + "Pense que você está traduzindo notícias para trazer o máximo de informações relevantes a cerca da mesma. "
-                            + "Não quero que você me forneça um resumo que vai me atiçar a ler a notícia, mas sim um resumo que vai"
-                            +" me permitir obter todo o conhecimento referente a notícia para não precisar entrar na mesma"
-                        );
-                    
-                    Console.WriteLine(gptRes);
+                { 
+                    if(news.HtmlList.Any()) 
+                    {
+                        newsList+=$"---------\nNotícia: {news.Title}\nLink: {news.ShortUrl}\nResumo: {news.ChatGPTMsg}\n---------";
+                    }
                 }
+
+                await slackNotifier.SendMessageAsync(newsList);
+                // await slackNotifier.SendMessageAsync("Olá, Slack! 🚀");
+                // await Task.Delay(60000 * 30, stoppingToken);
 
                 Console.WriteLine("De 15 em 15 minutos.");
             }

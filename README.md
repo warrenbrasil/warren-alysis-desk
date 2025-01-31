@@ -22,7 +22,6 @@
 
 # 🔒 Microserviço Base (MB)
 ## Requisitos funcionais
-    - Conectar a API da EZZE [ Auto Frota ].
     - Popular o banco de dados próprio caso não exista a informação.
     - A informação será consumida direito da nossa API e repassada ao destino solicitado.
 

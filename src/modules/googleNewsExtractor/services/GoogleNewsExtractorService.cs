@@ -1,16 +1,21 @@
+using System.Net;
+
 namespace warren_analysis_desk
 {
     public class GoogleNewsExtractorService : IGoogleNewsExtractorService
     {
         private readonly IRobotKeysRepository _robotKeysRepository;
         private readonly INewsRepository _newsRepository;
+        private readonly string Token;
 
         public GoogleNewsExtractorService(
             IRobotKeysRepository robotKeysRepository,
-            INewsRepository newsRepository)
+            INewsRepository newsRepository,
+            IConfiguration configuration)
         {
             _robotKeysRepository = robotKeysRepository;
             _newsRepository = newsRepository;
+            Token = configuration["ChatGPT:Token"];
         }
 
         public async Task<List<News>> GetGoogleNews()
@@ -31,45 +36,73 @@ namespace warren_analysis_desk
                         if (firstLink != null && firstTitle != null)
                         {
                             var hrefValue = firstLink.GetAttributeValue("href", string.Empty);
-                            var titleValue = firstTitle.GetAttributeValue("aria-label", string.Empty);
+                            // var titleValue = firstTitle.GetAttributeValue("aria-label", string.Empty);
+                            var titleValue = WebUtility.HtmlDecode(firstTitle.InnerText.Trim());
 
-                            var existingNews = await _newsRepository
-                                .GetByTitleAsync(titleValue
-                                    .Replace("Mais -", "").Trim()
-                                    .Replace("; entenda", ""));
+                            // var existingNews = await _newsRepository
+                            //     .GetByTitleAsync(titleValue
+                            //         .Replace("Mais -", "").Trim()
+                            //         .Replace("; entenda", ""));
+                            
+                            var existingNews = await _newsRepository.GetByTitleAsync(titleValue);
 
-                            string url = $"https://news.google.com{hrefValue.TrimStart('.')}";
+                            // string url = $"https://news.google.com{hrefValue.TrimStart('.')}";
+                            string url = hrefValue;
                             string shortenedUrl = await new LinkShortener().ShortenUrl(url);
 
-                            if (existingNews.Any())
-                            {
-                                var newsToUpdate = existingNews.FirstOrDefault();
-                                if (newsToUpdate != null)
-                                {
-                                    newsToUpdate.EndExecution = DateTime.Now;  
-                                    await _newsRepository.UpdateAsync(newsToUpdate); 
-                                }
-                            }
-                            else
-                            {
-                                var newsLists = new List<string>();
-                                var newObj = new News
-                                {
-                                    Title = titleValue
-                                        .Replace("Mais -", "").Trim()
-                                        .Replace("; entenda", ""),
-                                    Url = url,
-                                    ShortUrl = shortenedUrl,
-                                    RobotName = rks.KeyName,
-                                    PublishDate = DateTime.Now,
-                                    StartExecution = DateTime.Now,
-                                    EndExecution = DateTime.Now, 
-                                    RobotKeysId = rks.Id ?? 0,
-                                };
+                            var htmlDoc = await new WebFetcher().FetchNewsHtml(url);
 
-                                var insertedNews = await _newsRepository.AddAsync(newObj);  
-                                newObj.Id = insertedNews.Id;
-                                newsList.Add(newObj);
+                            if(htmlDoc != null)
+                            {
+                                var nodes = htmlDoc.DocumentNode.SelectNodes("//h1 | //h2 | //p");
+
+                                var textList = nodes?.Select(node => node.InnerText
+                                    .Trim()).Where(text => !string
+                                        .IsNullOrEmpty(text))
+                                            .ToList() ?? new List<string>();
+                                
+                                var formattedText = string.Join(", ", textList);
+
+                                var gptRes = textList.Any() ? await new ChatGptService(Token)
+                                    .GetChatGptResponseAsync(
+                                        $"Pode fazer um resumo do conteúdo dessas informações: \n [{formattedText}] \n em até 3 parágrafos. " 
+                                        + "Pense que você está traduzindo notícias para trazer o máximo de informações relevantes a cerca da mesma. "
+                                        + "Não quero que você me forneça um resumo que vai me atiçar a ler a notícia, mas sim um resumo que vai"
+                                        +" me permitir obter todo o conhecimento referente a notícia para não precisar entrar na mesma"
+                                    ) : "A página não contem elementos suficientes para gerar um resumo da notícia";
+
+                                if (existingNews.Any())
+                                {
+                                    var newsToUpdate = existingNews.FirstOrDefault();
+                                    if (newsToUpdate != null)
+                                    {
+                                        newsToUpdate.EndExecution = DateTime.Now;  
+                                        await _newsRepository.UpdateAsync(newsToUpdate); 
+                                    }
+                                }
+                                else
+                                {
+                                    var newObj = new News
+                                    {
+                                        // Title = titleValue
+                                        //     .Replace("Mais -", "").Trim()
+                                        //     .Replace("; entenda", ""),
+                                        Title = titleValue,
+                                        Url = url,
+                                        HtmlList = textList,
+                                        ChatGPTMsg = gptRes,
+                                        ShortUrl = shortenedUrl,
+                                        RobotName = rks.KeyName,
+                                        PublishDate = DateTime.Now,
+                                        StartExecution = DateTime.Now,
+                                        EndExecution = DateTime.Now, 
+                                        RobotKeysId = rks.Id ?? 0,
+                                    };
+
+                                    var insertedNews = await _newsRepository.AddAsync(newObj);  
+                                    newObj.Id = insertedNews.Id;
+                                    newsList.Add(newObj);
+                                }
                             }
                         }
                     }
@@ -80,6 +113,7 @@ namespace warren_analysis_desk
             catch (HttpRequestException ex)
             {
                 throw new Exception($"Error fetching news: {ex.Message}", ex);
+                // return null;
             }
         }
     }

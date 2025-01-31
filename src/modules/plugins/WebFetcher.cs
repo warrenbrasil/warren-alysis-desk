@@ -8,14 +8,21 @@ namespace warren_analysis_desk
 
         public async Task<HtmlDocument> FetchNewsHtml(string url)
         {
-            HttpResponseMessage response = await client.GetAsync(url);
-            response.EnsureSuccessStatusCode();
+            try 
+            {
+                HttpResponseMessage response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode();
 
-            string responseBody = await response.Content.ReadAsStringAsync();
-            var htmlDoc = new HtmlDocument();
-            htmlDoc.LoadHtml(responseBody);
+                string responseBody = await response.Content.ReadAsStringAsync();
+                var htmlDoc = new HtmlDocument();
+                htmlDoc.LoadHtml(responseBody);
 
-            return htmlDoc;
+                return htmlDoc;
+            }
+            catch(Exception ex)
+            {
+                return null;
+            }
         }
     }
 }
