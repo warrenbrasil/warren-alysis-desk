@@ -42,4 +42,18 @@ public class ExtractHtml
             return (null, null);
         }
     }
+
+    public async Task<(List<string>, string)> GetNewsHtmlList(HtmlDocument? htmlDoc)
+    {
+        var nodes = htmlDoc.DocumentNode.SelectNodes("//h1 | //h2 | //p");
+
+        var textList = nodes?.Select(node => node.InnerText
+            .Trim()).Where(text => !string
+                .IsNullOrEmpty(text))
+                    .ToList() ?? new List<string>();
+        
+        var formattedText = string.Join(", ", textList);
+
+        return (textList, formattedText);
+    }
 }

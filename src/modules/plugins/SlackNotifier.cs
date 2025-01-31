@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using System.Text;
 
+namespace warren_analysis_desk;
 public class SlackNotifier
 {
     private static readonly HttpClient client = new HttpClient();
@@ -13,12 +14,54 @@ public class SlackNotifier
         _channelId = channelId;
     }
 
-    public async Task SendMessageAsync(string message)
+    public async Task SendMessageAsync(List<News> googleNewsList)
     {
+        // var payload = new
+        // {
+        //     channel = _channelId,
+        //     text = message
+        // };
+
+        var blocks = new List<object>();
+
+        foreach (var (news, index) in googleNewsList.Select((value, i) => (value, i)))
+        {
+            if (news.HtmlList.Any())
+            {
+                var newsBlock = new
+                {
+                    type = "section",
+                    block_id = $"news_section_{index}",
+                    text = new
+                    {
+                        type = "mrkdwn",
+                        text = $"*Notícia:* {news.Title}\n*Link:* {news.ShortUrl}\n*Resumo:* {news.ChatGPTMsg}\n*Data:* {news.PublishDate}"
+                    },
+                    accessory = new
+                    {
+                        type = "checkboxes",
+                        action_id = "checkbox_action",
+                        options = new[]
+                        {
+                            new {
+                                text = new {
+                                    type = "plain_text",
+                                    text = "Marcar como lida"
+                                },
+                                value = "read"
+                            }
+                        }
+                    }
+                };
+
+                blocks.Add(newsBlock);
+            }
+        }
+
         var payload = new
         {
             channel = _channelId,
-            text = message
+            blocks
         };
 
         var jsonPayload = JsonConvert.SerializeObject(payload);

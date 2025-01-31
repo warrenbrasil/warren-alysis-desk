@@ -29,9 +29,7 @@ namespace warren_analysis_desk
                 {
                     foreach(var rk in rks.RobotKeysList)
                     { 
-                        var lt = await new ExtractHtml().GetLinksAndTitles(rk);
-                        var firstLink = lt.firstLink;
-                        var firstTitle = lt.firstTitle;
+                        var (firstLink, firstTitle) = await new ExtractHtml().GetLinksAndTitles(rk);
 
                         if (firstLink != null && firstTitle != null)
                         {
@@ -54,14 +52,7 @@ namespace warren_analysis_desk
 
                             if(htmlDoc != null)
                             {
-                                var nodes = htmlDoc.DocumentNode.SelectNodes("//h1 | //h2 | //p");
-
-                                var textList = nodes?.Select(node => node.InnerText
-                                    .Trim()).Where(text => !string
-                                        .IsNullOrEmpty(text))
-                                            .ToList() ?? new List<string>();
-                                
-                                var formattedText = string.Join(", ", textList);
+                                var (textList, formattedText) = await new ExtractHtml().GetNewsHtmlList(htmlDoc);
 
                                 var gptRes = textList.Any() ? await new ChatGptService(Token)
                                     .GetChatGptResponseAsync(
@@ -113,7 +104,6 @@ namespace warren_analysis_desk
             catch (HttpRequestException ex)
             {
                 throw new Exception($"Error fetching news: {ex.Message}", ex);
-                // return null;
             }
         }
     }
