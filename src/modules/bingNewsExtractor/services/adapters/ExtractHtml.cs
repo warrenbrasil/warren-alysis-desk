@@ -9,7 +9,7 @@ public class ExtractHtml
         try
         {
             // var htmlDoc = await new WebFetcher()
-            //     .FetchNewsHtml($"https://news.google.com/search?q={rk}%20when%3A1h&hl=pt-BR&gl=BR&ceid=BR%3Apt-419");
+            //     .FetchNewsHtml($"https://news.bing.com/search?q={rk}%20when%3A1h&hl=pt-BR&gl=BR&ceid=BR%3Apt-419");
 
             // var firstLink = htmlDoc.DocumentNode
             //     .Descendants("a")

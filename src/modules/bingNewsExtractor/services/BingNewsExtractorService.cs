@@ -2,13 +2,13 @@ using System.Net;
 
 namespace warren_analysis_desk
 {
-    public class GoogleNewsExtractorService : IGoogleNewsExtractorService
+    public class BingNewsExtractorService : IBingNewsExtractorService
     {
         private readonly IRobotKeysRepository _robotKeysRepository;
         private readonly INewsRepository _newsRepository;
         private readonly string Token;
 
-        public GoogleNewsExtractorService(
+        public BingNewsExtractorService(
             IRobotKeysRepository robotKeysRepository,
             INewsRepository newsRepository,
             IConfiguration configuration)
@@ -18,7 +18,7 @@ namespace warren_analysis_desk
             Token = configuration["ChatGPT:Token"];
         }
 
-        public async Task<List<News>> GetGoogleNews()
+        public async Task<List<News>> GetBingNews()
         {
             try
             {
@@ -34,21 +34,12 @@ namespace warren_analysis_desk
                         if (firstLink != null && firstTitle != null)
                         {
                             var hrefValue = firstLink.GetAttributeValue("href", string.Empty);
-                            // var titleValue = firstTitle.GetAttributeValue("aria-label", string.Empty);
                             var titleValue = WebUtility.HtmlDecode(firstTitle.InnerText.Trim());
-
-                            // var existingNews = await _newsRepository
-                            //     .GetByTitleAsync(titleValue
-                            //         .Replace("Mais -", "").Trim()
-                            //         .Replace("; entenda", ""));
                             
                             var existingNews = await _newsRepository.GetByTitleAsync(titleValue);
+                            string shortenedUrl = await new LinkShortener().ShortenUrl(hrefValue);
 
-                            // string url = $"https://news.google.com{hrefValue.TrimStart('.')}";
-                            string url = hrefValue;
-                            string shortenedUrl = await new LinkShortener().ShortenUrl(url);
-
-                            var htmlDoc = await new WebFetcher().FetchNewsHtml(url);
+                            var htmlDoc = await new WebFetcher().FetchNewsHtml(hrefValue);
 
                             if(htmlDoc != null)
                             {
@@ -75,11 +66,8 @@ namespace warren_analysis_desk
                                 {
                                     var newObj = new News
                                     {
-                                        // Title = titleValue
-                                        //     .Replace("Mais -", "").Trim()
-                                        //     .Replace("; entenda", ""),
                                         Title = titleValue,
-                                        Url = url,
+                                        Url = hrefValue,
                                         HtmlList = textList,
                                         ChatGPTMsg = gptRes,
                                         ShortUrl = shortenedUrl,

@@ -1,3 +1,6 @@
+using DocumentFormat.OpenXml.Office2010.Excel;
+using Newtonsoft.Json.Linq;
+
 using warren_analysis_desk;
 
 public class SlackSchedulerService : BackgroundService
@@ -21,6 +24,7 @@ public class SlackSchedulerService : BackgroundService
         {
             using (var scope = _serviceScopeFactory.CreateScope())
             {
+                // await Task.Delay(60000 * 30, stoppingToken);
                 // DateTime utcNow = DateTime.UtcNow;
                 // TimeZoneInfo brasiliaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
                 // DateTime brasiliaTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, brasiliaTimeZone);
@@ -31,15 +35,34 @@ public class SlackSchedulerService : BackgroundService
 
                 var slackNotifier = new SlackNotifier(OAuthToken, ChannelId);
 
-                var googleNewsExtractorService = scope.ServiceProvider
-                    .GetRequiredService<IGoogleNewsExtractorService>();
+                var bingNewsExtractorService = scope.ServiceProvider
+                    .GetRequiredService<IBingNewsExtractorService>();
                 
-                var googleNewsList = await googleNewsExtractorService.GetGoogleNews();
+                var newsService = scope.ServiceProvider
+                    .GetRequiredService<INewsService>();
+                
+                var bingNewsList = await bingNewsExtractorService.GetBingNews();
 
-                await slackNotifier.SendMessageAsync(googleNewsList);
+                var resMsg = await slackNotifier.SendMessageAsync(bingNewsList);
+                var jsonObj = JObject.Parse(resMsg);
+                string messageTs = jsonObj["message"]?["ts"]?.ToString();
+                Console.WriteLine(messageTs);
 
-                await Task.Delay(60000 * 30, stoppingToken);
+                // var tasks = bingNewsList.Select(async i =>
+                // {
+                //     var newsDto = new NewsDto
+                //     {
+                //         MessageId = messageTs,
+                //         RobotKeysId = i.RobotKeysId
+                //     };
+                    
+                //     await newsService.UpdateAsync(i.Id ?? 0, newsDto);
+                // }).ToList();
+
+                // await Task.WhenAll(tasks);
+
                 Console.WriteLine("De 30 em 30 minutos.");
+                await Task.Delay(60000 * 30, stoppingToken);
             }
         }
     }

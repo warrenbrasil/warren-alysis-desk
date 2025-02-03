@@ -9,6 +9,7 @@ public class News
 {
     [Key]
     public int? Id { get; set; }
+    public string? MessageId { get; set; }
     public string? Title { get; set; }
     public string? Url { get; set; }
     public List<string>? HtmlList { get; set; }
@@ -27,6 +28,7 @@ public class News
     public News(NewsDto dto)
     {
         Id = dto.Id;
+        MessageId = dto.MessageId;
         Title = dto.Title;
         Url = dto.Url;
         HtmlList = dto.HtmlList;

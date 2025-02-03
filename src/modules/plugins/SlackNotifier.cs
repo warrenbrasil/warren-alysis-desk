@@ -14,7 +14,7 @@ public class SlackNotifier
         _channelId = channelId;
     }
 
-    public async Task SendMessageAsync(List<News> googleNewsList)
+    public async Task<string> SendMessageAsync(List<News> bingNewsList)
     {
         // var payload = new
         // {
@@ -24,7 +24,7 @@ public class SlackNotifier
 
         var blocks = new List<object>();
 
-        foreach (var (news, index) in googleNewsList.Select((value, i) => (value, i)))
+        foreach (var (news, index) in bingNewsList.Select((value, i) => (value, i)))
         {
             if (news.HtmlList.Any())
             {
@@ -74,16 +74,18 @@ public class SlackNotifier
         HttpResponseMessage response = await client.SendAsync(request);
         string responseBody = await response.Content.ReadAsStringAsync();
 
-        Console.WriteLine($"Status Code: {response.StatusCode}");
-        Console.WriteLine($"Response: {responseBody}");
+        // Console.WriteLine($"Status Code: {response.StatusCode}");
+        // Console.WriteLine($"Response: {responseBody}");
         
         if (!response.IsSuccessStatusCode)
         {
             Console.WriteLine("Erro ao enviar mensagem!");
+            return null;
         }
         else
         {
             Console.WriteLine("Mensagem enviada com sucesso!");
+            return responseBody;
         }
     }
 }
