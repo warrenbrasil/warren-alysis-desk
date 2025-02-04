@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace warren_analysis_desk
 {
-    // [Authorize]
+    [Authorize]
     [ApiController]
     [Tags("Bing News Extractor")]
     [Route("api/bing-news-extractor")]

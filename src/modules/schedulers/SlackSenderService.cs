@@ -1,6 +1,4 @@
-using DocumentFormat.OpenXml.Office2010.Excel;
 using Newtonsoft.Json.Linq;
-
 using warren_analysis_desk;
 
 public class SlackSchedulerService : BackgroundService
@@ -24,16 +22,9 @@ public class SlackSchedulerService : BackgroundService
         {
             using (var scope = _serviceScopeFactory.CreateScope())
             {
-                // await Task.Delay(60000 * 30, stoppingToken);
-                // DateTime utcNow = DateTime.UtcNow;
-                // TimeZoneInfo brasiliaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
-                // DateTime brasiliaTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, brasiliaTimeZone);
-                // if(brasiliaTime.ToString("HH") == "6")
-                // {
-                    //preparar relatório diário
-                // }
+                await Task.Delay(60000 * 30, stoppingToken);
 
-                var slackNotifier = new SlackNotifier(OAuthToken, ChannelId);
+                var slackNotifier = new SlackNotifier(OAuthToken);
 
                 var bingNewsExtractorService = scope.ServiceProvider
                     .GetRequiredService<IBingNewsExtractorService>();
@@ -43,26 +34,44 @@ public class SlackSchedulerService : BackgroundService
                 
                 var bingNewsList = await bingNewsExtractorService.GetBingNews();
 
-                var resMsg = await slackNotifier.SendMessageAsync(bingNewsList);
+                var blocks = await new PrepareMessages().CheckboxNews(bingNewsList);
+
+                var payload = new
+                {
+                    channel = ChannelId,
+                    blocks
+                };
+
+                var resMsg = await slackNotifier.SendMessageAsync(payload);
                 var jsonObj = JObject.Parse(resMsg);
                 string messageTs = jsonObj["message"]?["ts"]?.ToString();
-                Console.WriteLine(messageTs);
 
-                // var tasks = bingNewsList.Select(async i =>
-                // {
-                //     var newsDto = new NewsDto
-                //     {
-                //         MessageId = messageTs,
-                //         RobotKeysId = i.RobotKeysId
-                //     };
-                    
-                //     await newsService.UpdateAsync(i.Id ?? 0, newsDto);
-                // }).ToList();
+                var slackMessagesService = scope.ServiceProvider
+                    .GetRequiredService<ISlackMessagesService>();
 
-                // await Task.WhenAll(tasks);
+                var blockIds = jsonObj["message"]?["blocks"]?
+                    .Select(block => (string)block["block_id"])
+                    .ToList() ?? new List<string>();
+
+                var newIds = bingNewsList
+                    .Where(news => news.HtmlList != null && news.HtmlList.Any())
+                    .Select(news => news.Id ?? 0)
+                    .ToList();
+
+                var pivotSlackMsgs = newIds.Zip(blockIds, (newId, blockId) => new SlackMessages
+                {
+                    IdNews = newId,
+                    MessageId = messageTs,
+                    BlockIds = blockId
+                });
+
+                foreach (var slackMessage in pivotSlackMsgs)
+                {
+                    await slackMessagesService.AddAsync(slackMessage);
+                }
 
                 Console.WriteLine("De 30 em 30 minutos.");
-                await Task.Delay(60000 * 30, stoppingToken);
+                // await Task.Delay(60000 * 30, stoppingToken);
             }
         }
     }

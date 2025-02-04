@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using warren_analysis_desk;
 
@@ -11,9 +12,11 @@ using warren_analysis_desk;
 namespace warren_analysis_desk.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250204123312_v10")]
+    partial class v10
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -102,9 +105,6 @@ namespace warren_analysis_desk.Migrations
                     b.Property<int>("IdNews")
                         .HasColumnType("int");
 
-                    b.Property<bool>("Marked")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<string>("MessageId")
                         .HasColumnType("longtext");
 
@@ -112,7 +112,7 @@ namespace warren_analysis_desk.Migrations
 
                     b.HasIndex("IdNews");
 
-                    b.ToTable("slack_messages");
+                    b.ToTable("SlackMessages");
                 });
 
             modelBuilder.Entity("warren_analysis_desk.News", b =>

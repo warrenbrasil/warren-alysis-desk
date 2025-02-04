@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using warren_analysis_desk;
 
@@ -11,9 +12,11 @@ using warren_analysis_desk;
 namespace warren_analysis_desk.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250204133738_v14")]
+    partial class v14
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,18 +102,18 @@ namespace warren_analysis_desk.Migrations
                     b.Property<string>("BlockIds")
                         .HasColumnType("longtext");
 
-                    b.Property<int>("IdNews")
-                        .HasColumnType("int");
-
                     b.Property<bool>("Marked")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("MessageId")
                         .HasColumnType("longtext");
 
+                    b.Property<int>("NewsId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("IdNews");
+                    b.HasIndex("NewsId");
 
                     b.ToTable("slack_messages");
                 });
@@ -130,7 +133,7 @@ namespace warren_analysis_desk.Migrations
                 {
                     b.HasOne("warren_analysis_desk.News", "News")
                         .WithMany()
-                        .HasForeignKey("IdNews")
+                        .HasForeignKey("NewsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

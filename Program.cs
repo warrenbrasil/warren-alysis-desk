@@ -45,6 +45,9 @@ builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddScoped<IRobotKeysRepository, RobotKeysRepository>();
 builder.Services.AddScoped<IRobotKeysService, RobotKeysService>();
 
+builder.Services.AddScoped<ISlackMessagesRepository, SlackMessagesRepository>();
+builder.Services.AddScoped<ISlackMessagesService, SlackMessagesService>();
+
 builder.Services.AddScoped<IBingNewsExtractorService, BingNewsExtractorService>();
 
 builder.Services.AddScoped<ISlackWebhookService, SlackWebhookService>();

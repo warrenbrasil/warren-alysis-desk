@@ -6,6 +6,7 @@ namespace warren_analysis_desk
     [ApiController]
     [Tags("Slack Webhook")]
     [Route("api/slack-webhook")]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class SlackWebhookController : ControllerBase
     {
         private readonly ISlackWebhookService _slackWebhookService;

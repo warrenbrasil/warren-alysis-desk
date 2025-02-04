@@ -9,7 +9,7 @@ public class ChatGptService(string token)
         ChatCompletion completion = client
             .CompleteChat(input);
             
-        Console.WriteLine($"[ASSISTANT]: {completion.Content[0].Text}");
+        // Console.WriteLine($"[ASSISTANT]: {completion.Content[0].Text}");
         return completion.Content[0].Text;
     }
 }

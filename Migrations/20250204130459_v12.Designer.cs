@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using warren_analysis_desk;
 
@@ -11,9 +12,11 @@ using warren_analysis_desk;
 namespace warren_analysis_desk.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250204130459_v12")]
+    partial class v12
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,18 +102,13 @@ namespace warren_analysis_desk.Migrations
                     b.Property<string>("BlockIds")
                         .HasColumnType("longtext");
 
-                    b.Property<int>("IdNews")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("Marked")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<string>("MessageId")
                         .HasColumnType("longtext");
 
-                    b.HasKey("Id");
+                    b.Property<string>("NewsId")
+                        .HasColumnType("longtext");
 
-                    b.HasIndex("IdNews");
+                    b.HasKey("Id");
 
                     b.ToTable("slack_messages");
                 });
@@ -124,17 +122,6 @@ namespace warren_analysis_desk.Migrations
                         .IsRequired();
 
                     b.Navigation("RobotKeys");
-                });
-
-            modelBuilder.Entity("warren_analysis_desk.SlackMessages", b =>
-                {
-                    b.HasOne("warren_analysis_desk.News", "News")
-                        .WithMany()
-                        .HasForeignKey("IdNews")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("News");
                 });
 
             modelBuilder.Entity("warren_analysis_desk.RobotKeys", b =>

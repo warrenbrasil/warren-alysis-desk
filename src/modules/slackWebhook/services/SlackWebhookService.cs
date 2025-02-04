@@ -1,13 +1,17 @@
-using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
-using System.Text;
 using System.Web;
 
 namespace warren_analysis_desk;
 
 public class SlackWebhookService : ISlackWebhookService
 {
-    // private readonly IRobotKeysRepository _robotKeysRepository = robotKeysRepository;
+    private readonly ISlackMessagesRepository _slackMessagesRepository;
+
+    public SlackWebhookService(ISlackMessagesRepository slackMessagesRepository)
+    {
+        _slackMessagesRepository = slackMessagesRepository 
+            ?? throw new ArgumentNullException(nameof(slackMessagesRepository));
+    }
 
     public async Task<string> WebhookAdd(string requestBody)
     {
@@ -16,21 +20,22 @@ public class SlackWebhookService : ISlackWebhookService
         string payloadDecoded = HttpUtility.UrlDecode(payloadEncoded);
 
         JObject payloadObject = JObject.Parse(payloadDecoded);
-        // Console.WriteLine($"Decoded payload: {payloadObject}");
 
-        Console.WriteLine($"{payloadObject["container"]["message_ts"]}");
+        string MessageId = $"{payloadObject["container"]["message_ts"]}";
 
         foreach (var block in (JArray)payloadObject["actions"])
         {
             if(block["selected_options"].Any())
             {
-                Console.WriteLine($"Checkbox {block["block_id"]} marcada.");
+                string BlockId = $"{block["block_id"]}";
+
+                await _slackMessagesRepository.MarkedUpdateAsync(BlockId, MessageId, true);
             } else {
-                Console.WriteLine($"Checkbox {block["block_id"]} desmarcada.");
+                string BlockId = $"{block["block_id"]}";
+
+                await _slackMessagesRepository.MarkedUpdateAsync(BlockId, MessageId, false);
             }
         }
-
-        // string messageTs = payloadObject["message"]?["ts"]?.ToString();
 
         return "Webhook processado com sucesso!";
     }
