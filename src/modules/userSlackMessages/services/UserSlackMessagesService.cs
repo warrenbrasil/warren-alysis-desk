@@ -1,7 +1,12 @@
 namespace warren_analysis_desk;
-public class UserSlackMessagesService(IUserSlackMessagesRepository userSlackMessagesRepository) : IUserSlackMessagesService
+public class UserSlackMessagesService : IUserSlackMessagesService
 {
-    private readonly IUserSlackMessagesRepository _userSlackMessagesRepository = userSlackMessagesRepository;
+    private readonly IUserSlackMessagesRepository _userSlackMessagesRepository;
+
+    public UserSlackMessagesService(IUserSlackMessagesRepository userSlackMessagesRepository)
+    {
+        _userSlackMessagesRepository = userSlackMessagesRepository;
+    }
 
     public async Task<IEnumerable<UserSlackMessages>> GetAllAsync()
     {

@@ -38,7 +38,8 @@ public class SlackMessagesRepository : ISlackMessagesRepository
                             PublishDate = news.PublishDate,
                             RobotName = news.RobotName,
                             ShortUrl = news.ShortUrl,
-                            Title = news.Title
+                            Title = news.Title,
+                            MessageId = slackMessage.MessageId,
                         });
                     }
                 }

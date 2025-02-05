@@ -30,17 +30,17 @@ public class SlackNotifier
         HttpResponseMessage response = await client.SendAsync(request);
         string responseBody = await response.Content.ReadAsStringAsync();
 
-        Console.WriteLine($"Status Code: {response.StatusCode}");
-        Console.WriteLine($"Response: {responseBody}");
+        // Console.WriteLine($"Status Code: {response.StatusCode}");
+        // Console.WriteLine($"Response: {responseBody}");
         
         if (!response.IsSuccessStatusCode)
         {
-            Console.WriteLine("Erro ao enviar mensagem!");
+            // Console.WriteLine("Erro ao enviar mensagem!");
             return null;
         }
         else
         {
-            Console.WriteLine("Mensagem enviada com sucesso!");
+            // Console.WriteLine("Mensagem enviada com sucesso!");
             return responseBody;
         }
     }

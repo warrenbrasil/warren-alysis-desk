@@ -1,9 +1,7 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace warren_analysis_desk 
 {
-    // [Authorize]
     [ApiController]
     [Tags("Slack Messages")]
     [Route("api/slack-messages")]

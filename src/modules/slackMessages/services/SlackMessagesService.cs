@@ -1,11 +1,17 @@
 namespace warren_analysis_desk;
-public class SlackMessagesService(ISlackMessagesRepository slackMessagesRepository) : ISlackMessagesService
+public class SlackMessagesService : ISlackMessagesService
 {
-    private readonly ISlackMessagesRepository _slackMessagesRepository = slackMessagesRepository;
+    private readonly ISlackMessagesRepository _slackMessagesRepository;
 
-    public async Task<byte[]> GetReportAsync(string SlackUsername)
+    public SlackMessagesService(
+        ISlackMessagesRepository slackMessagesRepository)
+        {
+            _slackMessagesRepository = slackMessagesRepository;
+        }
+
+    public async Task<byte[]> GetReportAsync(string SlackUserId)
     {
-        var reportContent = await _slackMessagesRepository.GetReportAsync(SlackUsername);
+        var reportContent = await _slackMessagesRepository.GetReportAsync(SlackUserId);
         string txt = $"";
 
         foreach(var rcs in reportContent)
@@ -14,6 +20,8 @@ public class SlackMessagesService(ISlackMessagesRepository slackMessagesReposito
         }
 
         using (var memoryStream = new MemoryStream())
+
+        
         using (var writer = new StreamWriter(memoryStream))
         {
             writer.WriteLine(txt);
@@ -24,9 +32,9 @@ public class SlackMessagesService(ISlackMessagesRepository slackMessagesReposito
         }
     }
 
-    public async Task<List<ReportItem>> GetAllAsync(string SlackUsername)
+    public async Task<List<ReportItem>> GetAllAsync(string SlackUserId)
     {
-        return await _slackMessagesRepository.GetReportAsync(SlackUsername);
+        return await _slackMessagesRepository.GetReportAsync(SlackUserId);
     }
 
     public async Task<SlackMessages> AddAsync(SlackMessages slackMessages)

@@ -1,6 +1,6 @@
 namespace warren_analysis_desk;
 
-public class PrepareMessages
+public class PrepareSchedulerMessages
 {
     public async Task<List<object>> CheckboxNews(List<News> bingNewsList)
     {

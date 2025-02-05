@@ -28,13 +28,12 @@ public class UserSlackMessagesRepository : IUserSlackMessagesRepository
             }
             else
             {
-                Console.WriteLine(SlackUsername);
                 userSlackMessage = new UserSlackMessages
                 {
                     SlackUserId = SlackUserId,
                     SlackMessagesId = slackMessage.Id,
                     SlackUserName = SlackUsername,
-                    Marked = Marked
+                    Marked = Marked,
                 };
                 _context.UserSlackMessages.Add(userSlackMessage);
             }

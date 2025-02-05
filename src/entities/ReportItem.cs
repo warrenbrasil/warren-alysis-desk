@@ -7,4 +7,5 @@ public class ReportItem
     public string RobotName { get; set; }
     public string ShortUrl { get; set; }
     public string Title { get; set; }
+    public string MessageId { get; set; }
 }

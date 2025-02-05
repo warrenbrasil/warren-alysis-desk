@@ -22,7 +22,7 @@ public class SlackSchedulerService : BackgroundService
         {
             using (var scope = _serviceScopeFactory.CreateScope())
             {
-                await Task.Delay(60000 * 30, stoppingToken);
+                // await Task.Delay(60000 * 30, stoppingToken);
 
                 var slackNotifier = new SlackNotifier(OAuthToken);
 
@@ -34,7 +34,7 @@ public class SlackSchedulerService : BackgroundService
                 
                 var bingNewsList = await bingNewsExtractorService.GetBingNews();
 
-                var blocks = await new PrepareMessages().CheckboxNews(bingNewsList);
+                var blocks = await new PrepareSchedulerMessages().CheckboxNews(bingNewsList);
 
                 var payload = new
                 {
@@ -71,7 +71,7 @@ public class SlackSchedulerService : BackgroundService
                 }
 
                 Console.WriteLine("De 30 em 30 minutos.");
-                // await Task.Delay(60000 * 30, stoppingToken);
+                await Task.Delay(60000 * 30, stoppingToken);
             }
         }
     }
