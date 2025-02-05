@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using warren_analysis_desk;
 
@@ -11,9 +12,11 @@ using warren_analysis_desk;
 namespace warren_analysis_desk.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250205113410_v16")]
+    partial class v16
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -123,12 +126,14 @@ namespace warren_analysis_desk.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int?>("Id"));
 
-                    b.Property<int>("SlackMessagesId")
+                    b.Property<int>("IdSlackMessages")
                         .HasColumnType("int");
 
-                    b.Property<string>("SlackUserName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int?>("SlackMessagesId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SlackUserName")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -163,9 +168,7 @@ namespace warren_analysis_desk.Migrations
                 {
                     b.HasOne("warren_analysis_desk.SlackMessages", "SlackMessages")
                         .WithMany()
-                        .HasForeignKey("SlackMessagesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SlackMessagesId");
 
                     b.Navigation("SlackMessages");
                 });

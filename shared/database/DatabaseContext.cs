@@ -7,5 +7,6 @@ public class DatabaseContext : DbContext
     public DbSet<News> News { get; set; }
     public DbSet<RobotKeys> RobotKeys { get; set; }
     public DbSet<SlackMessages> SlackMessages { get; set; }
+    public DbSet<UserSlackMessages> UserSlackMessages { get; set; }
     public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) {}
 }
