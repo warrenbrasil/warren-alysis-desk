@@ -2,7 +2,6 @@
 
 public interface ISlackMessagesRepository 
 {
-    Task<List<ReportItem>> GetReportAsync();
+    Task<List<ReportItem>> GetReportAsync(string SlackUserId);
     Task<SlackMessages> AddAsync(SlackMessages slackMessages);
-    Task MarkedUpdateAsync(string BlockId, string MessageId, bool Marked);
 }

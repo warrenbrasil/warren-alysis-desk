@@ -31,11 +31,11 @@ namespace warren_analysis_desk
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateSlackUser(UserSlackMessagesDto userSlackMessagesDto, string BlockId, string MessageId)
+        public async Task<IActionResult> AlterSlackUser(UserSlackMessagesDto userSlackMessagesDto, string BlockId, string MessageId)
         {
             try 
             {
-                var userSlackMessagess = await _userSlackMessagesService.CreateUserSlackMessageAsync(BlockId, MessageId, userSlackMessagesDto.SlackUserName);
+                var userSlackMessagess = await _userSlackMessagesService.AlterUserSlackMessageAsync(BlockId, MessageId, userSlackMessagesDto.SlackUserId, userSlackMessagesDto.SlackUserName, userSlackMessagesDto.Marked);
                 return Ok(userSlackMessagess);
             }
             catch (Exception ex)

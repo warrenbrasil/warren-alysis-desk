@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Mysqlx;
 using warren_analysis_desk;
 
 public class UserSlackMessagesRepository : IUserSlackMessagesRepository
@@ -10,32 +11,41 @@ public class UserSlackMessagesRepository : IUserSlackMessagesRepository
         _context = context;
     }
 
-    public async Task<UserSlackMessages> CreateUserSlackMessageAsync(string blockId, string messageId, string SlackUsername)
+    public async Task<UserSlackMessages> AlterUserSlackMessageAsync(string blockId, string messageId, string SlackUserId, string SlackUsername, bool Marked)
     {
         try
         {
             var slackMessage = await _context.SlackMessages
-                .FirstOrDefaultAsync(sm => sm.BlockIds == blockId && sm.MessageId == messageId);
+                .FirstOrDefaultAsync(sm => sm.BlockIds == blockId && sm.MessageId == messageId) 
+                    ?? throw new Exception("Slack message not found.");
 
-            if (slackMessage == null)
+            var userSlackMessage = await _context.UserSlackMessages
+                .FirstOrDefaultAsync(usm => usm.SlackUserId == SlackUserId && usm.SlackMessagesId == slackMessage.Id);
+
+            if (userSlackMessage != null)
             {
-                throw new Exception("Slack message not found.");
+                userSlackMessage.Marked = Marked;
+            }
+            else
+            {
+                Console.WriteLine(SlackUsername);
+                userSlackMessage = new UserSlackMessages
+                {
+                    SlackUserId = SlackUserId,
+                    SlackMessagesId = slackMessage.Id,
+                    SlackUserName = SlackUsername,
+                    Marked = Marked
+                };
+                _context.UserSlackMessages.Add(userSlackMessage);
             }
 
-            var userSlackMessage = new UserSlackMessages
-            {
-                SlackUserName = SlackUsername,
-                SlackMessagesId = slackMessage.Id
-            };
-
-            _context.UserSlackMessages.Add(userSlackMessage);
             await _context.SaveChangesAsync(); 
 
             return userSlackMessage;
         }
         catch (Exception ex)
         {
-            throw new Exception($"Error creating UserSlackMessage: {ex.Message}", ex);
+            throw new Exception($"Error creating/updating UserSlackMessage: {ex.Message}", ex);
         }
     }
 

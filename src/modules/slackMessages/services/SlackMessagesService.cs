@@ -3,9 +3,9 @@ public class SlackMessagesService(ISlackMessagesRepository slackMessagesReposito
 {
     private readonly ISlackMessagesRepository _slackMessagesRepository = slackMessagesRepository;
 
-    public async Task<byte[]> GetReportAsync()
+    public async Task<byte[]> GetReportAsync(string SlackUsername)
     {
-        var reportContent = await _slackMessagesRepository.GetReportAsync();
+        var reportContent = await _slackMessagesRepository.GetReportAsync(SlackUsername);
         string txt = $"";
 
         foreach(var rcs in reportContent)
@@ -24,9 +24,9 @@ public class SlackMessagesService(ISlackMessagesRepository slackMessagesReposito
         }
     }
 
-    public async Task<List<ReportItem>> GetAllAsync()
+    public async Task<List<ReportItem>> GetAllAsync(string SlackUsername)
     {
-        return await _slackMessagesRepository.GetReportAsync();
+        return await _slackMessagesRepository.GetReportAsync(SlackUsername);
     }
 
     public async Task<SlackMessages> AddAsync(SlackMessages slackMessages)

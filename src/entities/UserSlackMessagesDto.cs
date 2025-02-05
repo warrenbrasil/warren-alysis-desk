@@ -12,7 +12,9 @@ public class UserSlackMessagesDto
     [ForeignKey("slack_messages")]
     [JsonIgnore]
     public int? SlackMessagesId { get; set; }
+    public bool Marked { get; set; }
     public string SlackUserName { get; set; }
+    public string SlackUserId { get; set; }
     [JsonIgnore]
     public SlackMessages? SlackMessages { get; set; }
 }

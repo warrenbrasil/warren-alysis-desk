@@ -5,12 +5,12 @@ namespace warren_analysis_desk;
 
 public class SlackWebhookService : ISlackWebhookService
 {
-    private readonly ISlackMessagesRepository _slackMessagesRepository;
+    private readonly IUserSlackMessagesRepository _userSlackMessagesRepository;
 
-    public SlackWebhookService(ISlackMessagesRepository slackMessagesRepository)
+    public SlackWebhookService(IUserSlackMessagesRepository userSlackMessagesRepository)
     {
-        _slackMessagesRepository = slackMessagesRepository 
-            ?? throw new ArgumentNullException(nameof(slackMessagesRepository));
+        _userSlackMessagesRepository = userSlackMessagesRepository 
+            ?? throw new ArgumentNullException(nameof(userSlackMessagesRepository));
     }
 
     public async Task<string> WebhookAdd(string requestBody)
@@ -23,17 +23,20 @@ public class SlackWebhookService : ISlackWebhookService
 
         string MessageId = $"{payloadObject["container"]["message_ts"]}";
 
+        string userName = $"{payloadObject["user"]["username"]}";
+        string userId = $"{payloadObject["user"]["id"]}";
+
         foreach (var block in (JArray)payloadObject["actions"])
         {
             if(block["selected_options"].Any())
             {
                 string BlockId = $"{block["block_id"]}";
 
-                await _slackMessagesRepository.MarkedUpdateAsync(BlockId, MessageId, true);
+                await _userSlackMessagesRepository.AlterUserSlackMessageAsync(BlockId, MessageId, userId, userName, true);
             } else {
                 string BlockId = $"{block["block_id"]}";
 
-                await _slackMessagesRepository.MarkedUpdateAsync(BlockId, MessageId, false);
+                await _userSlackMessagesRepository.AlterUserSlackMessageAsync(BlockId, MessageId, userId, userName, false);
             }
         }
 

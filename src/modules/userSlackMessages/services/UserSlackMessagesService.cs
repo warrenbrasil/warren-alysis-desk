@@ -8,8 +8,8 @@ public class UserSlackMessagesService(IUserSlackMessagesRepository userSlackMess
         return await _userSlackMessagesRepository.GetAllAsync();
     }
 
-    public async Task<UserSlackMessages> CreateUserSlackMessageAsync(string blockId, string messageId, string SlackUsername)
+    public async Task<UserSlackMessages> AlterUserSlackMessageAsync(string blockId, string messageId, string SlackUserId, string SlackUsername, bool Marked)
     {
-        return await _userSlackMessagesRepository.CreateUserSlackMessageAsync(blockId, messageId, SlackUsername);
+        return await _userSlackMessagesRepository.AlterUserSlackMessageAsync(blockId, messageId, SlackUserId, SlackUsername, Marked);
     }
 }

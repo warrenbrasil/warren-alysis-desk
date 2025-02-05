@@ -11,7 +11,9 @@ public class UserSlackMessages
     public int? Id { get; set; }
     [ForeignKey("slack_messages")]
     public int? SlackMessagesId { get; set; }
+    public bool Marked { get; set; }
     public string SlackUserName { get; set; }
+    public string SlackUserId { get; set; }
     [JsonIgnore]
     public SlackMessages? SlackMessages { get; set; }
 
@@ -22,5 +24,7 @@ public class UserSlackMessages
         Id = dto.Id;
         SlackMessagesId = dto.SlackMessagesId ?? 0;
         SlackUserName = dto.SlackUserName;
+        SlackUserId = dto.SlackUserId;
+        Marked = dto.Marked;
     }
 }

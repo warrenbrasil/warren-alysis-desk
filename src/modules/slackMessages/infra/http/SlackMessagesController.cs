@@ -16,15 +16,16 @@ namespace warren_analysis_desk
             _slackMessagesService = slackMessagesService;
         }
 
+        [ApiExplorerSettings(IgnoreApi = true)]
         [HttpPost("report")]
         public async Task<IActionResult> GetReport()
         {
             try 
             {
-                // var formData = await Request.ReadFormAsync();
-                // var userName = formData["user_name"];
+                var formData = await Request.ReadFormAsync();
+                var userId = formData["user_id"];
                 var originUrl = Request.Headers["Origin"].ToString();
-                var fullUrl = $"{Request.Scheme}://{Request.Host}/api/slack-messages/download-report";
+                var fullUrl = $"{Request.Scheme}://{Request.Host}/api/slack-messages/download-report/{userId}";
 
                 return Ok(new { response_type = "in_channel", text = fullUrl });
             }
@@ -34,12 +35,12 @@ namespace warren_analysis_desk
             }
         }
 
-        [HttpGet("download-report")]
-        public async Task<IActionResult> DownloadReport()
+        [HttpGet("download-report/{slackUserId}")]
+        public async Task<IActionResult> DownloadReport(string slackUserId)
         {
             try 
             {
-                var fileBytes = await _slackMessagesService.GetReportAsync();
+                var fileBytes = await _slackMessagesService.GetReportAsync(slackUserId);
 
                 var fileName = "relatorio.txt";
                 return File(fileBytes, "application/octet-stream", fileName);
@@ -50,12 +51,12 @@ namespace warren_analysis_desk
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
+        [HttpGet("{slackUserId}")]
+        public async Task<IActionResult> GetAll(string slackUserId)
         {
             try 
             {
-                var slackMessagess = await _slackMessagesService.GetAllAsync();
+                var slackMessagess = await _slackMessagesService.GetAllAsync(slackUserId);
                 return Ok(slackMessagess);
             }
             catch (Exception ex)

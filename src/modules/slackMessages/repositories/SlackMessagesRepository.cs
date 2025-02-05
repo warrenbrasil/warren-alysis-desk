@@ -10,24 +10,41 @@ public class SlackMessagesRepository : ISlackMessagesRepository
         _context = context;
     }
 
-    public async Task<List<ReportItem>> GetReportAsync()
+    public async Task<List<ReportItem>> GetReportAsync(string SlackUserId)
     {
         try
         {
-            return await _context.SlackMessages
-                .Where(sm => sm.Marked == true)
-                .Join(_context.News,
-                    sm => sm.IdNews,
-                    n => n.Id,
-                    (sm, n) => new ReportItem
-                    {
-                        ChatGPTMsg = n.ChatGPTMsg,
-                        PublishDate = n.PublishDate,
-                        RobotName = n.RobotName,
-                        ShortUrl = n.ShortUrl,
-                        Title = n.Title
-                    })
+            var reportItems = new List<ReportItem>();
+
+            var userSlackMessages = await _context.UserSlackMessages
+                .Where(u => u.SlackUserId == SlackUserId && u.Marked == true)
                 .ToListAsync();
+
+            foreach (var userSlackMessage in userSlackMessages)
+            {
+                var slackMessage = await _context.SlackMessages
+                    .FirstOrDefaultAsync(sm => sm.Id == userSlackMessage.SlackMessagesId);
+
+                if (slackMessage != null)
+                {
+                    var news = await _context.News
+                        .FirstOrDefaultAsync(n => n.Id == slackMessage.IdNews);
+
+                    if (news != null)
+                    {
+                        reportItems.Add(new ReportItem
+                        {
+                            ChatGPTMsg = news.ChatGPTMsg,
+                            PublishDate = news.PublishDate,
+                            RobotName = news.RobotName,
+                            ShortUrl = news.ShortUrl,
+                            Title = news.Title
+                        });
+                    }
+                }
+            }
+
+            return reportItems;
         }
         catch (Exception ex)
         {
@@ -46,30 +63,6 @@ public class SlackMessagesRepository : ISlackMessagesRepository
         catch (Exception ex)
         {
             throw new Exception($"Error adding robot keys: {ex.Message}", ex);
-        }
-    }
-
-    public async Task MarkedUpdateAsync(string blockId, string messageId, bool marked)
-    {
-        try 
-        {
-            var existingMessage = await _context.SlackMessages
-                .FirstOrDefaultAsync(x => x.BlockIds == blockId && x.MessageId == messageId);
-
-            if (existingMessage == null)
-            {
-                throw new Exception("Slack message not found.");
-            }
-
-            existingMessage.Marked = marked;
-            _context.Entry(existingMessage).Property(x => x.Marked).IsModified = true;
-
-            await _context.SaveChangesAsync();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-            throw new Exception($"Error updating Marked field: {ex.Message}", ex);
         }
     }
 }
